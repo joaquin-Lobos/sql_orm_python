@@ -61,13 +61,22 @@ def create_schema():
     # Crear las tablas
     base.metadata.create_all(engine)
 
-def add_data(name, age, grade, tutor_id):
+def add_data(name, age, grade, tutor):
     Session = sessionmaker(bind=engine)
     session = Session()
 
-    data = Estudiante(name=name, age=age, grade=grade, tutor_id=tutor_id)
+    query = session.query(Tutor).filter(Tutor.id == tutor)
+    add = query.first()
+
+    if add is None:
+        print(f"no existe el alumno {name} con el tutor: {tutor.name}")
+        return
+
+    data = Estudiante(name=name, age=age, grade=grade, tutor_id=tutor)
+    data.autor = add
     session.add(data)
     session.commit()
+
 
 def fill():
     print('Completemos esta tablita!')
@@ -94,11 +103,17 @@ def fill():
     # grade --> en que año de la secundaria se encuentra (1-6)
     # tutor --> el tutor de ese estudiante (el objeto creado antes)
 
-    add_data("esteban",12,1,1)
-    add_data("juan",16,5,2)
-    add_data("paco",15,4,1)
-    add_data("roberto",18,6,2)
-    add_data("lucia",13,2,1)
+    contador = 0
+    while True:
+        if contador >= 5:
+            break
+        estudiante = str(input("ingrese el nombre del estudiante:\n"))
+        edad = int(input("ingrese la edad del estudiante:\n"))
+        grado = int(input("ingrese el grado del estudiante:\n"))
+        tutor = int(input("ingrese el numero del tutor :\n"))
+        add_data(estudiante, edad, grado, tutor)
+        contador += 1
+
 
     # No olvidarse que antes de poder crear un estudiante debe haberse
     # primero creado el tutor.
@@ -131,7 +146,7 @@ def search_by_tutor(tutor):
 
     result = session.query(Estudiante).join(Estudiante.tutor).filter(Tutor.name == tutor)
 
-    print ("Alumnos asignados a ", tutor)
+    print ("Alumnos asignados a:", tutor)
 
     for data in result:
         print(data)
@@ -162,7 +177,7 @@ def modify(id, name):
     session.add(cambiar)
     session.commit()
 
-    print('Persona actualizada', name)
+    print("tutor actualizado", name)
 
     # TIP: En clase se hizo lo mismo para las nacionalidades con
     # en la función update_persona_nationality
@@ -178,7 +193,7 @@ def count_grade(grade):
     session = Session()
 
     result = session.query(Estudiante).filter(Estudiante.grade == grade).count()
-    print('Personas de', grade, 'encontradas:', result)
+    print("estudiantes del grado", grade, "resultado:", result)
 
 
     # TIP: En clase se hizo lo mismo para las nacionalidades con

@@ -62,14 +62,14 @@ def add_data(title, pags, author):
     session = Session()
 
     query = session.query(Author).filter(Author.name == author)
-    cargar = query.first()
+    add = query.first()
 
-    if cargar is None:
+    if add is None:
         print(f"el libro {title} no existe con este autor: {author}")
         return
 
     book = Book(title=title, pags=pags, autor=author)
-    book.autor = cargar
+    book.autor = add
     session.add(book)
     session.commit()
 
